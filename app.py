@@ -15,7 +15,7 @@ def read_root():
     return {"message": "Ollama está funcionando"}
 
 # Rota para gerar embeddings recebendo o corpo da requisição como JSON
-@app.post("/api/embeddings")
+@app.post("/api/embed")
 async def generate_embedding(request: EmbedRequest):
     try:
         # Extrai o modelo e o prompt do JSON
