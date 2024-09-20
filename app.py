@@ -9,6 +9,10 @@ class EmbedRequest(BaseModel):
     model: str
     input: str
 
+class EmbenddingRequest(BaseModel):
+    model: str
+    prompt: str
+
 # Rota padrão para verificar se o Ollama está funcionando
 @app.get("/")
 def read_root():
@@ -16,7 +20,7 @@ def read_root():
 
 # Rota para gerar embeddings recebendo o corpo da requisição como JSON
 @app.post("/api/embed")
-async def generate_embedding(request: EmbedRequest):
+async def generate_embed(request: EmbedRequest):
     try:
         # Extrai o modelo e o prompt do JSON
         model = request.model
@@ -41,3 +45,29 @@ async def generate_embedding(request: EmbedRequest):
     else:
         raise HTTPException(status_code=500, detail="Erro ao gerar embeddings")
 
+
+@app.post("/api/embenddings")
+async def generate_embeddings(request: EmbendingRequest):
+    try:
+        # Extrai o modelo e o prompt do JSON
+        model = request.model
+        prompt= request.prompt
+    
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Erro ao processar a requisição: {str(e)}")
+    
+    # Prepara a requisição para o Ollama
+    url = "http://localhost:11434/api/embed"  # Ollama API endpoint
+    payload = {
+        "model": model,
+        "prompt": prompt
+    }
+    headers = {"Content-Type": "application/json"}
+    
+    # Faz a requisição POST ao Ollama
+    response = requests.post(url, json=payload, headers=headers)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise HTTPException(status_code=500, detail="Erro ao gerar embeddings")
