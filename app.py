@@ -7,7 +7,7 @@ app = FastAPI()
 # Modelo para receber o corpo da requisição
 class EmbedRequest(BaseModel):
     model: str
-    prompt: str
+    input: str
 
 # Rota padrão para verificar se o Ollama está funcionando
 @app.get("/")
@@ -20,7 +20,7 @@ async def generate_embedding(request: EmbedRequest):
     try:
         # Extrai o modelo e o prompt do JSON
         model = request.model
-        prompt = request.prompt
+        input = request.input
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Erro ao processar a requisição: {str(e)}")
@@ -29,7 +29,7 @@ async def generate_embedding(request: EmbedRequest):
     url = "http://localhost:11434/api/embed"  # Ollama API endpoint
     payload = {
         "model": model,
-        "prompt": prompt
+        "input": input
     }
     headers = {"Content-Type": "application/json"}
     
