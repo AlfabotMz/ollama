@@ -47,7 +47,7 @@ async def generate_embed(request: EmbedRequest):
 
 
 @app.post("/api/embenddings")
-async def generate_embeddings(request: EmbendingRequest):
+async def generate_embeddings(request: EmbenddingRequest):
     try:
         # Extrai o modelo e o prompt do JSON
         model = request.model
