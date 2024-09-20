@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from typing import Dict
 import requests
 
 app = FastAPI()
@@ -9,18 +9,18 @@ app = FastAPI()
 def read_root():
     return {"message": "Ollama está funcionando"}
 
-# Modelo para receber dados via POST
-class EmbedRequest(BaseModel):
-    model: str
-    prompt: str
-
 # Rota para gerar embeddings usando o modelo especificado
 @app.post("/api/embed")
-def generate_embedding(request: EmbedRequest):
+def generate_embedding(request: Dict):
+    # Verificar se o JSON contém os campos necessários
+    if "model" not in request or "prompt" not in request:
+        raise HTTPException(status_code=400, detail="Campos 'model' e 'prompt' são obrigatórios.")
+
+    # Prepara a requisição para o Ollama
     url = "http://localhost:11434/api/embed"  # Ollama API endpoint
     payload = {
-        "model": request.model,
-        "prompt": request.prompt
+        "model": request["model"],
+        "prompt": request["prompt"]
     }
     headers = {"Content-Type": "application/json"}
     
@@ -30,4 +30,3 @@ def generate_embedding(request: EmbedRequest):
         return response.json()
     else:
         raise HTTPException(status_code=500, detail="Erro ao gerar embeddings")
-
