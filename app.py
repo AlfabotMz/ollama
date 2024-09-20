@@ -1,14 +1,11 @@
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
+import json
 import requests
 
 app = FastAPI()
 
 # Modelo para receber o corpo da requisição
-class EmbedRequest(BaseModel):
-    model: str
-    input: str
-
 class EmbenddingRequest(BaseModel):
     model: str
     prompt: str
