@@ -20,12 +20,24 @@ def read_root():
 
 # Rota para gerar embeddings recebendo o corpo da requisição como JSON
 @app.post("/api/embed")
-async def generate_embed(request: EmbedRequest):
+async def generate_embed(request: Request):
     try:
-        # Extrai o modelo e o prompt do JSON
-        model = request.model
-        input = request.input
+        # Lê o corpo da requisição como string
+        body = await request.body()
+        body_str = body.decode("utf-8").strip()  # Remove espaços em branco nas extremidades
+
+        # Tenta interpretar a string como JSON
+        data = json.loads(body_str)
+
+        # Verifica se 'model' e 'input' estão presentes
+        if 'model' not in data or 'input' not in data:
+            raise HTTPException(status_code=400, detail="Campos 'model' e 'input' são obrigatórios.")
+
+        model = data['model']
+        input_text = data['input']
     
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="O corpo da requisição deve ser um JSON válido.")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Erro ao processar a requisição: {str(e)}")
     
@@ -33,7 +45,7 @@ async def generate_embed(request: EmbedRequest):
     url = "http://localhost:11434/api/embed"  # Ollama API endpoint
     payload = {
         "model": model,
-        "input": input
+        "prompt": input_text  # Usa o campo input como prompt
     }
     headers = {"Content-Type": "application/json"}
     
@@ -44,7 +56,6 @@ async def generate_embed(request: EmbedRequest):
         return response.json()
     else:
         raise HTTPException(status_code=500, detail="Erro ao gerar embeddings")
-
 
 @app.post("/api/embenddings")
 async def generate_embeddings(request: EmbenddingRequest):
