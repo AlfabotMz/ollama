@@ -1,5 +1,5 @@
-from fastapi import FastAPI, HTTPException
-from typing import Dict
+from fastapi import FastAPI, HTTPException, Request
+import json
 import requests
 
 app = FastAPI()
@@ -9,18 +9,31 @@ app = FastAPI()
 def read_root():
     return {"message": "Ollama está funcionando"}
 
-# Rota para gerar embeddings usando o modelo especificado
+# Rota para gerar embeddings recebendo o corpo da requisição como string e convertendo para dicionário
 @app.post("/api/embed")
-def generate_embedding(request: Dict):
-    # Verificar se o JSON contém os campos necessários
-    if "model" not in request or "prompt" not in request:
-        raise HTTPException(status_code=400, detail="Campos 'model' e 'prompt' são obrigatórios.")
+async def generate_embedding(request: Request):
+    try:
+        # Lê o corpo da requisição como string
+        body_str = request.decode("utf-8")
+        
+        # Converte a string para um dicionário
+        data = json.loads(body_str)
 
+        # Verifica se 'model' e 'prompt' estão no dicionário
+        if 'model' not in data or 'prompt' not in data:
+            raise HTTPException(status_code=400, detail="Campos 'model' e 'prompt' são obrigatórios.")
+        
+        model = data['model']
+        prompt = data['prompt']
+
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Erro ao decodificar a string JSON.")
+    
     # Prepara a requisição para o Ollama
     url = "http://localhost:11434/api/embed"  # Ollama API endpoint
     payload = {
-        "model": request["model"],
-        "prompt": request["prompt"]
+        "model": model,
+        "prompt": prompt
     }
     headers = {"Content-Type": "application/json"}
     
