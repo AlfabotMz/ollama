@@ -11,13 +11,11 @@ def read_root():
 
 # Rota para gerar embeddings recebendo o corpo da requisição como string e convertendo para dicionário
 @app.post("/api/embed")
-async def generate_embedding(request: Request):
+async def generate_embedding(request: str):
     try:
-        # Lê o corpo da requisição como string
-        body_str = request.decode("utf-8")
         
         # Converte a string para um dicionário
-        data = json.loads(body_str)
+        data = json.loads(request)
 
         # Verifica se 'model' e 'prompt' estão no dicionário
         if 'model' not in data or 'prompt' not in data:
